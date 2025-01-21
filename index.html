@@ -1,1 +1,86 @@
-fgfg
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version Usage Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Application Version Usage Statistics</h1>
+        <canvas id="versionChart"></canvas>
+    </div>
+
+    <script>
+        // Fetch version statistics from the server
+        async function fetchVersionStats() {
+            try {
+                const response = await fetch('http://localhost:3000/get-version-stats');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching version stats:', error);
+            }
+        }
+
+        // Render the chart using Chart.js
+        async function renderChart() {
+            const stats = await fetchVersionStats();
+
+            if (!stats || stats.length === 0) {
+                alert('No data available');
+                return;
+            }
+
+            const versions = stats.map(item => item.version);
+            const userCounts = stats.map(item => item.user_count);
+
+            const ctx = document.getElementById('versionChart').getContext('2d');
+            const versionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: versions,
+                    datasets: [{
+                        label: 'Users per Version',
+                        data: userCounts,
+                        backgroundColor: '#4e73df',
+                        borderColor: '#4e73df',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render the chart when the page loads
+        renderChart();
+    </script>
+</body>
+</html>
